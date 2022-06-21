@@ -125,11 +125,12 @@ namespace DtmSample.Controllers
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpPost("saga-mysqlbarrier")]
-        public async Task<IActionResult> SagaMySQLBarrier(CancellationToken cancellationToken)
+        public async Task<IActionResult> SagaMySQLBarrier(string id,CancellationToken cancellationToken)
         {
             try
             {
-                _logger.LogInformation("____________开始____________________");
+                Console.Clear();
+                _logger.LogInformation($"____________开始____________________       {id} ");
                 var gid = await _dtmClient.GenGid(cancellationToken);
                 var saga = _transFactory.NewSaga(gid)
                     .Add(_settings.BusiUrl + "/barrierTransOutSaga", _settings.BusiUrl + "/barrierTransOutSagaRevert", new TransRequest("1", -30))
