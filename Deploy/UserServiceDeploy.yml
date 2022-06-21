@@ -1,0 +1,95 @@
+# 版本号
+apiVersion: v1
+# Kubernetes资源类型，服务类型
+kind: Service
+# 元数据
+metadata:
+  # 该资源Service类型的名称
+  name: userservice
+  # 自定义的标签列表,key-value键值对
+  labels:
+    app: userservice
+# 该Service资源详细定义
+spec:
+  #该Service访问的类型，NodePort类型可以对外暴露，让外部访问这个集群
+  type: NodePort
+  # 该Service对外暴露的端口列表
+  ports:
+  # Service服务监听的端口，Service在集群内部暴露的端口
+  - port: 80
+    # 端口名称/标示类型
+    name: http
+    # 需要转发到pod的端口号，需要与容器监听端口一致，不然会导致访问不到
+    # 它用来确定提供该服务的容器所暴露的端口号，即具体业务的进程在容器内的targetPort上提供TCP/IP
+    # 内部端口映射到Pod暴露出的端口
+    targetPort: 80
+    # 对外暴露的端口号，如果不指定则随机生成一个端口号
+    nodePort: 30001
+  # 标签选择器配置，将具有以下标签的Pod都归属于当前Service管理
+  selector:
+    #指定label中app: {{.appName}}的Pod归属于当前Service
+    app: userservice
+#这个代表一个yaml模版配置中包含多个Kubernetes资源类型，所以用 --- 进行分割
+#kind: Deployment、kind: Service ......
+---
+#版本号，可以通过 kubectl api-versions 命令进行获取当前支持的版本
+apiVersion: apps/v1
+#Kubernetes资源类型，部署应用类型，为ReplicaSet和Pod的创建提供一种声明式的定义方法
+#无需手动创建ReplicaSet/Replication Controller和Pod，使用Deployment支持滚动升级和回滚等特性
+kind: Deployment
+#该资源元数据
+metadata:
+  #该资源名称，决定了Pod的显示名称
+  name: userservice
+#该资源的详细定义
+spec:
+  # 指定运行的Pod数量，它会根据selector来进行选择，会将选择到的Pod维持在{{.replicas}}个的数目量
+  replicas: 1
+  # 主要用于滚动升级Deployment，Kubernetes在等待设置的时间后才进行升级
+  # 如果没有设置该值，Kubernetes会认为该容器启动起来后就提供服务了
+  # 所以需要设置一个间隔时间，用来指定Pod可用状态的最小秒数
+  minReadySeconds: 10
+  # 更新策略/升级策略
+  # 指定新Pod替换旧Pod的策略，type为rollingUpdate为使用滚动更新的方式更新Pod
+  strategy:
+    #默认为滚动升级
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2             # 滚动升级中，容器副本的最大数量，运行比replicas总共多多少个 pod
+      maxUnavailable: 1       # 滚动升级中，允许的最大不可用的pod个数
+  # set类型的选择器
+  # 还有一个matchExpressions
+  # 类似下面的配置方式
+  # matchExpressions:
+  #   - {key: app, operator: In, value: [nginx]}
+  # 指明哪个pod被管理，这里我们指定了app: {{.appName}}
+  selector:
+    matchLabels:
+      app: userservice
+  # 扩容时创建Pod的模板
+  template:
+    #元数据
+    metadata:
+      #标签列表
+      labels:
+        app: userservice
+    spec:
+      # K8S将会给应用发送SIGTERM信号，用来优雅地关闭应用,默认为30秒
+      terminationGracePeriodSeconds: 30 
+      # pod中的容器列表
+      containers:
+      # 容器名称
+      - name: userservice
+        # 容器镜像名称
+        image: userservice:latest
+        # 获取镜像的策略，其中有Always,IfNotPresent,Never
+        # Always=>每次都会重新下载镜像
+        # IfNotPresent=>如果本地又镜像则使用，否则下载镜像
+        # Never=>仅使用本地镜像
+        imagePullPolicy: IfNotPresent
+        # 容器需要暴露的端口号列表
+        ports:
+        # 端口的名称
+        - name: http
+          # 容器需要监听的端口
+          containerPort: 80
