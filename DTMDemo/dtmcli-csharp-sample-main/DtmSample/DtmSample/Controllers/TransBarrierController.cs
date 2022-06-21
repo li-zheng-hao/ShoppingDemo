@@ -174,7 +174,6 @@ namespace DtmSample.Controllers
         public async Task<IActionResult> BarrierTransOutSaga([FromQuery] string gid, [FromQuery] string trans_type,
             [FromQuery] string branch_id, [FromQuery] string op, [FromBody] TransRequest body)
         {
-            _logger.LogInformation("barrierTransOutSaga, QueryString={0}, body={1}", Request.QueryString, body.ToString());
 
             var branchBarrier = _barrierFactory.CreateBranchBarrier(Request.Query);
 
@@ -205,7 +204,6 @@ namespace DtmSample.Controllers
         public async Task<IActionResult> BarrierTransOutSagaRevert([FromQuery] string gid, [FromQuery] string trans_type,
           [FromQuery] string branch_id, [FromQuery] string op, [FromBody] TransRequest body)
         {
-            _logger.LogInformation("barrierTransOutSagaRevert, QueryString={0}", Request.QueryString);
             
             var branchBarrier = _barrierFactory.CreateBranchBarrier(Request.Query);
 
@@ -227,7 +225,6 @@ namespace DtmSample.Controllers
         public async Task<IActionResult> BarrierTransInSaga([FromQuery] string gid, [FromQuery] string trans_type,
             [FromQuery] string branch_id, [FromQuery] string op, [FromBody] TransRequest body)
         {
-            _logger.LogInformation("barrierTransInSaga, QueryString={0}", Request.QueryString);
 
             var branchBarrier = _barrierFactory.CreateBranchBarrier(trans_type, gid, branch_id, op);
             bool success = true;
@@ -267,7 +264,6 @@ namespace DtmSample.Controllers
         public async Task<IActionResult> BarrierTransInSagaRevert([FromQuery] string gid, [FromQuery] string trans_type,
             [FromQuery] string branch_id, [FromQuery] string op, [FromBody] TransRequest body)
         {
-            _logger.LogInformation("BarrierTransInSagaRevert, QueryString={0}, body={1}", Request.QueryString, body.ToString());
 
             var branchBarrier = _barrierFactory.CreateBranchBarrier(Request.Query);
 

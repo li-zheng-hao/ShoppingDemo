@@ -129,7 +129,7 @@ namespace DtmSample.Controllers
         {
             try
             {
-
+                _logger.LogInformation("____________开始____________________");
                 var gid = await _dtmClient.GenGid(cancellationToken);
                 var saga = _transFactory.NewSaga(gid)
                     .Add(_settings.BusiUrl + "/barrierTransOutSaga", _settings.BusiUrl + "/barrierTransOutSagaRevert", new TransRequest("1", -30))
@@ -139,8 +139,8 @@ namespace DtmSample.Controllers
                 await saga.Submit(cancellationToken);
             }catch(Exception ex)
             {
-                _logger.LogError($"捕获到事务失败了,失败原因是{ex.Message}");
-                throw;
+                //_logger.LogError($"捕获到事务失败了,失败原因是{ex.Message}");
+                //throw;
             }
 
 
